@@ -1,0 +1,50 @@
+// ┌──────────────────────────────────────────────────────┐
+// │░█▀▀░█░█░█░█░░░█▀▀░▀█▀░█░█░█░░░█▀▀░█▀▀░█░█░█▀▀░█▀▀░▀█▀│
+// │░█▀▀░█▄█░█▄█░░░▀▀█░░█░░░█░░█░░░█▀▀░▀▀█░█▀█░█▀▀░█▀▀░░█░│
+// │░▀▀▀░▀░▀░▀░▀░░░▀▀▀░░▀░░░▀░░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░░▀░│
+// └──────────────────────────────────────────────────────┘
+button {
+    &:hover {
+        background-color: #6272a4;
+    }
+    border-radius: 0;
+}
+.header {
+    color: #bd93f9;
+    font-size: 17px;
+    font-family: "Jetbrains Mono Semibold";
+}
+.button {
+    color: #f8f8f2;
+    font-size: 35px;
+}
+.poweroff {
+    color: #ff5555;
+    font-size: 50px;
+}
+.logout {
+    color: #f8f8f2;
+    font-size: 50px;
+}
+.reboot {
+    color: #f8f8f2;
+    font-size: 50px;
+}
+.sleep {
+    color: #f1fa8c;
+    font-size: 50px;
+}
+.graph {
+    color: #6272a4;
+    background-color: #282a36;
+    trough progress {
+        background-color: #6272a4;
+    }
+}
+.base {
+    color: #f8f8f2;
+    font-size: 15px;
+}
+.bg {
+    border: 3px solid #6272a4;
+}

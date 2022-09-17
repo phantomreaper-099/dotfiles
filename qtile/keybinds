@@ -1,0 +1,11 @@
+|MOD 1...5		Move to workspace 1...5|
+|MOD h,j,k,l		     Move focus ←,↓,↑,→|
+|MOD Shift h,j,k,l	    Move window ←,↓,↑,→|
+|MOD Ctrl h,j,k,l	  Resize window ←,↓,↑,→|
+|MOD n			     Reset window sizes|
+|MOD Shift q		   Close focused window|
+|MOD Shift r		    Reload Qtile config|
+|MOD Shift e		     Open EWW powermenu|
+|MOD r			         Open Rofi menu|
+|MOD f			      Fullscreen window|
+|MOD [_]                           Float window|

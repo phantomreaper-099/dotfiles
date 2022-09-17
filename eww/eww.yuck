@@ -1,0 +1,183 @@
+;; ┌────────────┐
+;; │░█▀▀░█░█░█░█│
+;; │░█▀▀░█▄█░█▄█│
+;; │░▀▀▀░▀░▀░▀░▀│
+;; └────────────┘
+
+;; VARIABLES
+;; =========
+(defpoll songname :interval "1s"
+	'deadbeef --nowplaying-tf "%title% by %artist% (%album%)"')
+(defpoll user :interval "1h"
+	'whoami')
+(defpoll host :interval "1h"
+	'hostname')
+(defpoll date :interval "1s"
+	'date +"%-d|%b|%Y(%a)"')
+(defpoll time :interval "1s"
+	'date +"%H:%M:%S"')
+(defvar app1 'brave-browser')(defvar app2 'steam')(defvar app3 'deadbeef')(defvar app4 'kate')
+(deflisten vol
+'amixer -D pulse sget Master | grep "Left:" | awk -F "[][]" "{ print $2 }" | tr -d ""%" | head -1')
+(defpoll qtlkb :interval "1h"
+'cat ~/.config/qtile/keybinds')
+
+;; WIDGETS
+;; =======
+(defwidget ram []
+(box :space-evenly false :orientation "v" :style "background-color: #282a36;" :width 180
+ (label :text "RAM Used:" :xalign 0.5 :class "header")
+ (progress :value {EWW_RAM.used_mem*100/EWW_RAM.total_mem}
+	:orientation "h"
+	:class "graph"
+	:valign "start"
+	:height 10
+	:halign "center")
+ (label :text {round(EWW_RAM.used_mem_perc,1)+"%"} :class "base")
+))
+(defwidget cpu []
+(box :space-evenly false :orientation "v" :spacing 5
+  (label :text "CPU Usage:" :xalign 0.5 :class "header")
+   (overlay
+    (circular-progress :value {EWW_CPU.avg}
+		:start-at 75
+		:thickness 40
+		:clockwise true
+		:valign "center"
+		:vexpand true
+		:width 150
+		:height 150
+		:class "graph")
+    (label :text {round(EWW_CPU.avg,1)+"%"} :class "base"))
+))
+(defwidget user []
+(box :space-evenly false :orientation "v" :valign "center"
+ (label :text {user+"@"+host} :class "header")
+ (image :path '/home/aman/Downloads/wu-shang-brawlhalla.png' :image-width 200 :tooltip {user+"@"+host})
+ (label :text date :class "base")
+ (label :text time :class "base")
+))
+(defwidget net []
+(box :space-evenly false :style "background-color: #282a36" :orientation "v" :spacing 10 :valign "center"
+ (label :text "Network" :class "header")
+  (label :text "UP: ${round(EWW_NET.wlp2s0['NET_UP']/1024,2)}kbps" :class "base")
+   (graph :value {EWW_NET.wlp2s0["NET_UP"]} :class "graph" :height 100 :width 200 :thickness 3 :dynamic true :time-range "20s" :style "color: #ff5555;")
+  (label :text "DOWN: ${round(EWW_NET.wlp2s0['NET_DOWN']/1024,2)}kbps" :class "base")
+   (graph :value {EWW_NET.wlp2s0["NET_DOWN"]} :class "graph" :height 100 :width 200 :thickness 3 :dynamic true :time-range "20s" :style "color: #50fa7b;")
+))
+(defwidget stats []
+(box :orientation "h" :spacing 10 :space-evenly false :class "bg"
+  (box :orientation "v" :space-evenly false :valign "center" :spacing 20
+   (cpu)(ram))
+  (user)
+  (net)
+))
+
+(defwidget deadbeef []
+(box :space-evenly false :orientation "v" :class "bg"
+ (label :text {songname==" by  ()" ? "DeaDBeeF" : songname}
+	:xalign 0.5
+	:yalign 0.7
+	:class "header"
+	:wrap true
+	:vexpand true)
+ (box :space-evenly true :orientation "h" :vexpand true :spacing 5 :halign "center" :width 400 :valign "center" :height 95
+  (button :class "button"
+	  :onclick '/usr/bin/deadbeef --prev'
+	  "")
+  (button :class "button"
+	  :onclick '/usr/bin/deadbeef --toggle-pause'
+	  "")
+  (button :class "button"
+	  :onclick '/usr/bin/deadbeef --next'
+	  "")
+  (button :class "button"
+	  :onclick '/usr/bin/deadbeef --stop'
+	  ""))
+))
+
+(defwidget power []
+(box :space-evenly false :orientation "v" :spacing 4 :class "bg"
+ (label :text {user+"@"+host}
+	:xalign 0.5
+	:yalign 0.5
+	:height 40
+	:class "base")
+ (box :space-evenly true :orientation "h" :spacing 3 :vexpand true
+  (button :class "poweroff" :onclick 'shutdown now' "")
+  (button :class "reboot" :onclick 'reboot' "")
+  (button :class "logout" :onclick 'loginctl kill-session self' "")
+  (button :class "sleep" :onclick '~/.local/bin/eww close powermenu && systemctl suspend' ""))
+))
+
+(defwidget icons []
+(box :space-evenly true :orientation "h" :class "bg"
+ (button :onclick app1 (image :path "/usr/share/icons/Papirus/24x24/apps/${app1}.svg" :image-width 40))
+ (button :onclick app2 (image :path "/usr/share/icons/Papirus/24x24/apps/${app2}.svg" :image-width 40))
+ (button :onclick app3 (image :path "/usr/share/icons/Papirus/24x24/apps/${app3}.svg" :image-width 40))
+ (button :onclick app4 (image :path "/usr/share/icons/Papirus/24x24/apps/${app4}.svg" :image-width 40))
+))
+
+(defwidget qkb []
+(box :space-evenly false :orientation "v" :class "bg"
+ (label :text "Qtile Keybindings" :xalign 0.5 :yalign 0.5 :class "header")
+ (label :text qtlkb :class "base" :xalign 0.5)
+))
+
+;; WINDOWS
+;; =======
+(defwindow music :geometry
+(geometry :x "-15px"
+		:y "15px"
+		:anchor "top right"
+		:height "190px"
+		:width "420px")
+	:stacking "bg"
+	:windowtype "normal"
+	:wm-ignore true
+	:focusable true
+(deadbeef))
+
+(defwindow stats :geometry
+(geometry  :x "0px"
+		 :y "-43px"
+		 :anchor "bottom center"
+		 :height "200px"
+		 :width "600px")
+	:stacking "bg"
+	:windowtype "normal"
+	:wm-ignore true
+(stats))
+
+(defwindow powermenu :geometry
+(geometry :x "0%"
+		 :y "40%"
+		 :anchor "top center"
+		 :height "140px"
+		 :width "390px")
+	:stacking "fg"
+	:windowtype "normal"
+	:wm-ignore true
+(power))
+
+(defwindow apps :geometry
+(geometry :x "0%"
+		:y "2%"
+		:height "30px"
+		:width "200px"
+		:anchor "top center")
+	:stacking "bg"
+	:windowtype "normal"
+	:wm-ignore true
+(icons))
+
+(defwindow keybind :geometry
+(geometry :x "0%"
+		:y "10%"
+		:height "40%"
+		:width "30%"
+		:anchor "top center")
+	:stacking "bg"
+	:windowtype "normal"
+	:wm-ignore true
+(qkb))
