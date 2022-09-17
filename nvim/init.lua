@@ -27,6 +27,7 @@ vim.call('plug#begin')
  Plug 'mhinz/vim-startify'
  Plug 'nvim-lualine/lualine.nvim'
  Plug 'ryanoasis/vim-devicons'
+ Plug('ms-jpq/coq_nvim', {branch = 'coq'})
 vim.call('plug#end')
 
 vim.cmd('colorscheme dracula')
@@ -41,11 +42,11 @@ vim.g.startify_custom_footer = {
 "	Software is like sex, it's better when it's free",
 '		- Linus Torvalds',}
 vim.cmd('autocmd VimEnter * NERDTree ~/.config | wincmd p')
+vim.cmd('autocmd VimEnter * COQnow -s')
 vim.cmd('autocmd BufEnter * if tabpagenr("$") == 1 && winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree() | quit | endif')
 vim.g.NERDTreeShowHidden = true
 vim.g.NERDTreeHightlightCursorLine = true
 
--- Lualine
 require('lualine').setup {
 options = {
 	icons_enabled = true,
