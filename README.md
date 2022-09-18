@@ -4,7 +4,8 @@
 
 ### General
 
-- [Jetbrains Mono Nerd Font](https://nerdfonts.com/font-downloads)  
+- [JetBrains](https://github.com/JetBrains/JetBrainsMono)  
+- [Any Nerd Font](https://nerdfonts.com/font-downloads)  
 
 ### Neovim
 
