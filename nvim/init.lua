@@ -22,11 +22,10 @@ vim.o.listchars = 'tab:>>'
 local Plug = vim.fn['plug#']
 vim.call('plug#begin')
  Plug('dracula/vim', {as = 'dracula'})
- Plug 'preservim/nerdtree'
+ Plug('ms-jpq/chadtree', {branch = 'chad', ['do'] = vim.fn['python3 -m chadtree deps']})
  Plug 'elkowar/yuck.vim'
  Plug 'mhinz/vim-startify'
  Plug 'nvim-lualine/lualine.nvim'
- Plug 'ryanoasis/vim-devicons'
  Plug('ms-jpq/coq_nvim', {branch = 'coq'})
 vim.call('plug#end')
 
@@ -41,12 +40,14 @@ vim.g.startify_custom_header = {
 vim.g.startify_custom_footer = {
 "	Software is like sex, it's better when it's free",
 '		- Linus Torvalds',}
-vim.cmd('autocmd VimEnter * NERDTree ~/.config | wincmd p')
+vim.cmd('autocmd VimEnter * CHADopen')
 vim.cmd('autocmd VimEnter * COQnow -s')
-vim.cmd('autocmd BufEnter * if tabpagenr("$") == 1 && winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree() | quit | endif')
-vim.g.NERDTreeShowHidden = true
-vim.g.NERDTreeHightlightCursorLine = true
+vim.g.chadtree_settings = {
+	['options.show_hidden'] = true,}
+vim.g.coq_settings = {
+	['display.icons.mode'] = "long",}
 
+-- Lualine
 require('lualine').setup {
 options = {
 	icons_enabled = true,
@@ -85,5 +86,5 @@ inactive_sections = {
 tabline = {},
 winbar = {},
 inactive_winbar = {},
-extensions = {'nerdtree'}
+extensions = {'chadtree'}
 }
