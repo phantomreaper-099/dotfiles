@@ -17,6 +17,8 @@ vim.o.shiftwidth = 5
 vim.o.mouse = 'a'
 vim.o.list = true
 vim.o.listchars = 'tab:>>'
+vim.o.cursorline = true
+vim.o.tgc = true
 
 -- Packages
 local Plug = vim.fn['plug#']
@@ -27,9 +29,15 @@ vim.call('plug#begin')
  Plug 'mhinz/vim-startify'
  Plug 'nvim-lualine/lualine.nvim'
  Plug('ms-jpq/coq_nvim', {branch = 'coq'})
+ Plug 'ms-jpq/coq.artifacts'
+ Plug 'ms-jpq/coq.thirdparty'
+ Plug('rrethy/vim-hexokinase', {['do'] = 'make hexokinase' })
+ Plug 'neovim/nvim-lspconfig'
 vim.call('plug#end')
 
 vim.cmd('colorscheme dracula')
+vim.cmd('highlight MatchParen guifg=#21222c')
+vim.cmd('highlight MatchParen guibg=#6272a4')
 vim.g.startify_lists = {{ type = 'dir', header = {'   MRU : /home/aman'}},}
 vim.g.startify_custom_header = {
 '	┌────────────────────────┐',
@@ -40,12 +48,37 @@ vim.g.startify_custom_header = {
 vim.g.startify_custom_footer = {
 "	Software is like sex, it's better when it's free",
 '		- Linus Torvalds',}
-vim.cmd('autocmd VimEnter * CHADopen')
-vim.cmd('autocmd VimEnter * COQnow -s')
+vim.cmd('autocmd VimEnter * CHADopen --nofocus')
+vim.cmd('autocmd BufEnter * if (winnr("$") == 1 && &buftype == "nofile" && &filetype == "CHADTree") | q! | endif')
 vim.g.chadtree_settings = {
-	['options.show_hidden'] = true,}
+	['options.show_hidden'] = true,
+	['theme.icon_glyph_set'] = "devicons",
+	['theme.icon_colour_set'] = "github",
+	['theme.text_colour_set'] = "nord",
+	['theme.discrete_colour_map'] = {
+		blue = '#bd93f9',
+		red = '#ff5555',
+		yellow = '#f1fa8c',
+		black = '#21222c',
+		magenta = '#ff79c6',
+		cyan = '#8be9fd',
+		white = '#f8f8f2',
+		green = '#50fa7b',}}
+vim.g.Hexokinase_highlighters = {'backgroundfull'}
+vim.g.Hexokinase_optInPatterns = 'full_hex,rgb,rgba,hsl,hsla'
+
+-- LSP
+require('lspconfig').pyright.setup{}
+require("coq_3p") {
+  { src = "nvimlua", short_name = "nLUA" },
+  { src = "vimtex",  short_name = "vTEX" },
+  { src = 'builtin/syntax' },
+}
 vim.g.coq_settings = {
-	['display.icons.mode'] = "long",}
+	['display.icons.mode'] = "short",
+	['auto_start'] = 'shut-up',
+	['clients.lsp.enabled'] = true,
+	['clients.buffers.enabled'] = false}
 
 -- Lualine
 require('lualine').setup {
