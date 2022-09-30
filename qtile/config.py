@@ -3,11 +3,11 @@
 # │░█\█░░█░░░█░░█░░░█▀▀│
 # │░░▀\░░▀░░▀▀▀░▀▀▀░▀▀▀│
 # └────────────────────┘
-from libqtile import bar, layout, widget, hook
+from libqtile import backend, bar, layout, widget, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
-from libqtile.utils import guess_terminal
-import os, subprocess
+import os, subprocess, psutil
+from qtile_extras import widget
 
 mod = "mod4"
 terminal = "kitty"
@@ -16,7 +16,7 @@ dracula = {
     "red": "#ff5555",
     "select": "#6272a4",
     "purple": "#bd93f9",
-    "fg": "f8f8f2",
+    "fg": "#f8f8f2",
     "yellow": "#f1fa8c",
     "bg": "#282a36",
     "cyan": "#8be9fd",
@@ -24,7 +24,9 @@ dracula = {
     "grey": "#44475a"
 }
 
-
+############
+# Bindings
+############
 keys = [
     # Switch between windows
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
@@ -48,7 +50,7 @@ keys = [
     Key([mod, "shift"], "q", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "shift"], "r", lazy.reload_config(), desc="Reload config"),
     Key([mod, "shift"], "e", lazy.spawn("/home/aman/.local/bin/eww open --toggle powermenu"), desc="Powermenu"),
-    Key([mod], "r", lazy.spawn("rofi -show combi -disable-history"), desc="Rofi"), # Rofi
+    Key([mod], "r", lazy.spawn("rofi -show run -disable-history"), desc="Rofi"), # Rofi
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     Key([mod], "f", lazy.window.toggle_fullscreen(), desc="Fullscreen window"),
     # Volume Control
@@ -57,13 +59,15 @@ keys = [
     Key([],"XF86AudioMute", lazy.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")),
 ]
 
+##########
 # Groups
+##########
 groups = [
     Group("1", matches = [Match(wm_class="brave-browser")], label = "", layout = "max"),
-    Group("2", matches = [Match(wm_class=["kitty","kate"])], label = "",),
-    Group("3", matches = [Match(wm_class="deadbeef")], label = "" ,),
-    Group("4"),
-    Group("5", matches = [Match(wm_class="Steam")], label = "",layout = "max"),
+    Group("2", matches = [Match(wm_class=["kitty"])], label = "",),
+    Group("3", matches = [Match(wm_class="deadbeef")], label = "" ,layout = "max"),
+    Group("4", matches = [Match(wm_class="Steam")], label = "",layout = "max"),
+    Group("5", label = "", layout = "treetab"),
 ]
 for i in groups:
     keys.extend([
@@ -71,7 +75,9 @@ for i in groups:
         Key([mod, "shift"], i.name, lazy.window.togroup(i.name)),
     ])
 
+###########
 # Layouts
+###########
 layout_themes = {
     'border_width': 3,
     'border_focus': dracula['select'],
@@ -80,17 +86,17 @@ layout_themes = {
 }
 layouts = [
     layout.MonadTall(**layout_themes,ratio=0.6,max_ratio=0.8,min_ratio=0.3),
-    layout.TreeTab(panel_width=103,fontsize=10,previous_on_rm=True,vspace=-1,padding_x=0,font='JetbrainsMonoSemibold',margin_x=0,
-                   sections=['Windows'],section_left=25,
-                   # Colors
-                   **layout_themes,
-                   active_bg=dracula['select'],inactive_bg=dracula['grey'],bg_color=dracula['grey'],urgent_bg=dracula['red'],urgent_fg=dracula['fg'],
-                   active_fg=dracula['fg'],inactive_fg=dracula['fg'],section_fg=dracula['fg'],),
+    layout.TreeTab( panel_width=103,fontsize=10,previous_on_rm=True,vspace=-1,padding_x=0,font='JetbrainsMonoSemibold',margin_x=0,
+                    sections=['Windows'],section_left=25,
+                    # Colors
+                    **layout_themes,
+                    active_bg=dracula['select'],inactive_bg=dracula['grey'],bg_color=dracula['grey'],urgent_bg=dracula['red'],urgent_fg=dracula['fg'],
+                    active_fg=dracula['fg'],inactive_fg=dracula['fg'],section_fg=dracula['fg'],),
     layout.Max(**layout_themes)
     # layout.Stack(num_stacks=1,**layout_themes),
     # layout.VerticalTile(),
     # layout.Zoomy(),
-    # layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
+    # layout.Columns(border_focus_stack=["#bd93f9", "#6272a4"], border_width=4),
     # layout.Bsp(),
     # layout.Matrix(),
     # layout.MonadWide(),
@@ -101,17 +107,24 @@ floating_layout = layout.Floating(**layout_themes,
     float_rules=[
         # Run the utility of `xprop` to see the wm class and name of an X client.
         *layout.Floating.default_float_rules,
-        Match(wm_class="confirmreset"),  # gitk
-        Match(wm_class="makebranch"),  # gitk
-        Match(wm_class="maketag"),  # gitk
-        Match(wm_class="ssh-askpass"),  # ssh-askpass
-        Match(title="branchdialog"),  # gitk
-        Match(title="pinentry"),  # GPG key password entry
+        Match(wm_class="confirmreset"),
+        Match(wm_class="makebranch"),
+        Match(wm_class="maketag"),
+        Match(wm_class="ssh-askpass"),
+        Match(title="branchdialog"),
+        Match(title="pinentry"),
     ]
 )
+# Drag floating layouts.
+mouse = [
+    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
+    Click([mod], "Button2", lazy.window.bring_to_front()),
+]
 
-
-# Widgets
+#######
+# Bar
+#######
 widget_defaults = dict(
     font="JetbrainsMonoNerdFont",
     fontsize=12,
@@ -119,6 +132,11 @@ widget_defaults = dict(
     background=dracula['bg'],
     foreground=dracula['fg'],
 )
+powerline = {
+    "decorations": [
+        widget.decorations.PowerLineDecoration(path='arrow_right',size=9)
+    ]
+}
 extension_defaults = widget_defaults.copy()
 screens = [
     Screen(
@@ -128,50 +146,37 @@ screens = [
                     border_width=2,disable_drag=True,padding=2,hide_unused=True,highlight_method="line",
                     highlight_color=[dracula['grey'],dracula['grey']],inactive=dracula['fg'],this_current_screen_border=dracula['purple'],urgent=dracula['red']),
                 widget.WindowName(
-                    fontsize=11,font='JetbrainsMonoNerdFont'),
-                widget.TextBox(text='',padding=0,foreground=dracula['purple']),
+                    fontsize=11,font='JetbrainsMonoNerdFont',**powerline),
                 widget.TextBox(
-                    text='ewwidgets',foreground=dracula['bg'],background=dracula['purple'],
+                    text='ewwidgets',foreground=dracula['bg'],background=dracula['purple'],**powerline,
                     mouse_callbacks={'Button1': lazy.spawn('/home/aman/.local/bin/eww open-many --toggle stats music apps keybind')}),
-                widget.TextBox(text='',padding=0,foreground=dracula['bg'],background=dracula['purple']),
-                widget.HDDGraph(
-                    border_color=dracula['cyan'],border_width=1,fill_color=dracula['select'],graph_color=dracula['select']),
-                widget.TextBox(text='',padding=0,foreground=dracula['select']),
+                widget.Wttr(
+                    foreground=dracula['cyan'],location={'kochi': 'Home'},format='%C %f (%t)',update_interval=10,**powerline),
                 widget.Memory(
-                    format='RAM:{MemUsed:.0f}{mm}/{MemTotal:.0f}{mm}',background=dracula['select']),
-                widget.TextBox(text='',padding=0,foreground=dracula['bg'],background=dracula['select']),
+                    format='RAM:{MemUsed:.0f}{mm}/{MemTotal:.0f}{mm}',background=dracula['select'],**powerline),
                 widget.PulseVolume(
-                    fmt='{}',step=1,),
-                widget.TextBox(text='',padding=0,foreground=dracula['green']),
-                widget.Battery(
-                    format="{char}{percent:1.0%}",charge_char="",discharge_char="",full_char='',background=dracula['green'],low_background=dracula['red'], foreground=dracula['bg'],update_interval=5,),
-                widget.TextBox(text='',padding=0,background=dracula['green'],foreground=dracula['bg']),
+                    fmt='{}',step=1,background=dracula['green'],foreground=dracula['bg'],**powerline,),
+                widget.UPowerWidget(
+                    update_interval=5,),
                 widget.Clock(
-                    format='%-d|%b|%Y(%a) %H:%M:%S',foreground=dracula['cyan']),
-                widget.Sep(
-                    foreground=dracula['fg']),
+                    format='%-d|%b|%Y(%a) %H:%M:%S',foreground=dracula['cyan'],**powerline,),
                 widget.Systray(
-                    padding=2,icon_size=18,),
-                #widget.Sep(
-                #    foreground=dracula['fg'],padding=20),
+                    padding=2,icon_size=18,background=dracula['grey']),
                 widget.CurrentLayoutIcon(
-                    scale=0.55)],
+                    scale=0.55,background=dracula['grey']),
+                ],
             24,
             background=dracula['bg'],
             foreground=dracula['fg'],
-            border_width=[2, 2, 2, 2],
+            border_width=[2, 2, 1, 2], # Up, Right, Down, Left
             border_color=[dracula['cyan'], dracula['cyan'], dracula['cyan'], dracula['cyan']],
         ),
     ),
 ]
 
-# Drag floating layouts.
-mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front()),
-]
-
+########
+# Misc
+########
 dgroups_key_binder = None
 dgroups_app_rules = []  # type: list
 follow_mouse_focus = True
@@ -195,3 +200,20 @@ def set_floating(window):
     if (window.window.get_wm_transient_for()
             or window.window.get_wm_type() in floating_types):
         window.floating = True
+
+@hook.subscribe.client_new
+def _swallow(window):
+    pid = window.window.get_net_wm_pid()
+    ppid = psutil.Process(pid).ppid()
+    cpids = {
+        c.window.get_net_wm_pid(): wid for wid, c in window.qtile.windows_map.items()
+    }
+    for i in range(5):
+        if not ppid:
+            return
+        if ppid in cpids:
+            parent = window.qtile.windows_map.get(cpids[ppid])
+            parent.minimized = True
+            window.parent = parent
+            return
+        ppid = psutil.Process(ppid).ppid()
