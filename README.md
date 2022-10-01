@@ -16,3 +16,7 @@
 - [YUCK syntax highighting](https://github.com/elkowar/yuck.vim)  
 - [Lualine](https://github.com/nvim-lualine/lualine.nvim)  
 - [COQ (code completion)](https://github.com/ms-jpq/coq_nvim)  
+
+### Qtile  
+
+- [qtile-extras](https://github.com/elParaguayo/qtile-extras)  
