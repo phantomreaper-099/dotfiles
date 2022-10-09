@@ -1,11 +1,15 @@
 # Dotfiles (WIP)
 
+## Disclaimer
+
+All of these dotfiles were made for my personal use and might not work for you. It is advised to just use this repo for inspiration and reference
+
 ## Requirements:
 
 ### General
 
 - The programs themselves  
-- [JetBrains](https://github.com/JetBrains/JetBrainsMono)  
+- [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono)  
 - [Any Nerd Font](https://nerdfonts.com/font-downloads)  
 
 ### Neovim
