@@ -21,3 +21,8 @@ All of these dotfiles were made for my personal use and might not work for you. 
 ### Qtile  
 
 - [qtile-extras](https://github.com/elParaguayo/qtile-extras)  
+
+### EWW  
+
+- [DeaDBeeF (music player)](github.com/DeaDBeeF-Player/deadbeef)
+- [Papirus Icon Theme](https://github.com/PapirusDevelopmentTeam/papirus-icon-theme)
