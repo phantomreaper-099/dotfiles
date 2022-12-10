@@ -16,17 +16,17 @@
 	'date +"%-d|%b|%Y(%a)"')
 (defpoll time :interval "1s"
 	'date +"%H:%M:%S"')
-(defvar app1 'brave-browser')(defvar app2 'steam')(defvar app3 'deadbeef')(defvar app4 'kate')
-(deflisten vol
-'amixer -D pulse sget Master | grep "Left:" | awk -F "[][]" "{ print $2 }" | tr -d ""%" | head -1')
 (defpoll qtlkb :interval "1h"
 'cat ~/.config/qtile/keybinds')
+(defpoll wtr :interval "1m"
+'curl wttr.in/kerala')
+(defvar app1 'brave-browser')(defvar app2 'steam')(defvar app3 'thunar')(defvar app4 'nvim')
 
 ;; WIDGETS
 ;; =======
 (defwidget ram []
 (box :space-evenly false :orientation "v" :style "background-color: #282a36;" :width 180
- (label :text "RAM Used:" :xalign 0.5 :class "header")
+ (label :text " RAM Used: " :xalign 0.5 :class "header")
  (progress :value {EWW_RAM.used_mem*100/EWW_RAM.total_mem}
 	:orientation "h"
 	:class "graph"
@@ -35,9 +35,10 @@
 	:halign "center")
  (label :text {round(EWW_RAM.used_mem_perc,1)+"%"} :class "base")
 ))
+
 (defwidget cpu []
 (box :space-evenly false :orientation "v" :spacing 5
-  (label :text "CPU Usage:" :xalign 0.5 :class "header")
+  (label :text " CPU Usage: " :xalign 0.5 :class "header")
    (overlay
     (circular-progress :value {EWW_CPU.avg}
 		:start-at 75
@@ -50,6 +51,7 @@
 		:class "graph")
     (label :text {round(EWW_CPU.avg,1)+"%"} :class "base"))
 ))
+
 (defwidget user []
 (box :space-evenly false :orientation "v" :valign "center"
  (label :text {user+"@"+host} :class "header")
@@ -57,37 +59,44 @@
  (label :text date :class "base")
  (label :text time :class "base")
 ))
+
 (defwidget net []
-(box :space-evenly false :style "background-color: #282a36" :orientation "v" :spacing 10 :valign "center"
+(box :space-evenly false :orientation "v" :spacing 5 :valign "center"
  (label :text "Network" :class "header")
-  (label :text "UP: ${round(EWW_NET.wlp2s0['NET_UP']/1024,2)}kbps" :class "base")
-   (graph :value {EWW_NET.wlp2s0["NET_UP"]} :class "graph" :height 100 :width 200 :thickness 3 :dynamic true :time-range "20s" :style "color: #ff5555;")
-  (label :text "DOWN: ${round(EWW_NET.wlp2s0['NET_DOWN']/1024,2)}kbps" :class "base")
-   (graph :value {EWW_NET.wlp2s0["NET_DOWN"]} :class "graph" :height 100 :width 200 :thickness 3 :dynamic true :time-range "20s" :style "color: #50fa7b;")
+ (label :text "UP: ${round(EWW_NET.wlp2s0['NET_UP']/1024,2)}kbps" :class "base")
+    (graph :value {EWW_NET.wlp2s0["NET_UP"]} :class "graph" :height 100 :width 200 :thickness 3 :dynamic true :time-range "20s" 
+           :style "color: #ff5555;")
+ (label :text "DOWN: ${round(EWW_NET.wlp2s0['NET_DOWN']/1024,2)}kbps" :class "base")
+    (graph :value {EWW_NET.wlp2s0["NET_DOWN"]} :class "graph" :height 100 :width 200 :thickness 3 :dynamic true :time-range "20s" 
+           :style "color: #50fa7b;")
 ))
+
 (defwidget stats []
 (box :orientation "h" :spacing 10 :space-evenly false :class "bg"
+  (user)
   (box :orientation "v" :space-evenly false :valign "center" :spacing 20
    (cpu)(ram))
-  (user)
   (net)
 ))
 
 (defwidget deadbeef []
 (box :space-evenly false :orientation "v" :class "bg"
- (label :text {songname==" by  ()" ? "DeaDBeeF" : songname}
+ (label :text {songname == " by  ()" ? "DeaDBeeF" : songname}
 	:xalign 0.5
 	:yalign 0.7
 	:class "header"
 	:wrap true
 	:vexpand true)
- (box :space-evenly true :orientation "h" :vexpand true :spacing 5 :halign "center" :width 400 :valign "center" :height 95
+ (box :space-evenly true :orientation "h" :vexpand true :spacing 5 :halign "center" :width 460 :valign "center" :height 95
   (button :class "button"
 	  :onclick '/usr/bin/deadbeef --prev'
 	  "")
   (button :class "button"
-	  :onclick '/usr/bin/deadbeef --toggle-pause'
+	  :onclick '/usr/bin/deadbeef --play'
 	  "")
+  (button :class "button"
+	  :onclick '/usr/bin/deadbeef --toggle-pause'
+	  "")
   (button :class "button"
 	  :onclick '/usr/bin/deadbeef --next'
 	  "")
@@ -105,23 +114,18 @@
 	:class "base")
  (box :space-evenly true :orientation "h" :spacing 3 :vexpand true
   (button :class "poweroff" :onclick 'shutdown now' "")
-  (button :class "reboot" :onclick 'reboot' "")
-  (button :class "logout" :onclick 'loginctl kill-session self' "")
-  (button :class "sleep" :onclick '~/.local/bin/eww close powermenu && systemctl suspend' ""))
+  (button :class "powerbutton" :onclick 'reboot' "")
+  (button :class "sleep" :onclick '~/.local/bin/eww close powermenu && systemctl suspend' "")
+  (button :class "powerbutton" :onclick 'loginctl kill-session self' "")
+  (button :class "poweroff" :onclick '~/.local/bin/eww close powermenu' ""))
 ))
 
 (defwidget icons []
 (box :space-evenly true :orientation "h" :class "bg"
  (button :onclick app1 (image :path "/usr/share/icons/Papirus/24x24/apps/${app1}.svg" :image-width 40))
  (button :onclick app2 (image :path "/usr/share/icons/Papirus/24x24/apps/${app2}.svg" :image-width 40))
- (button :onclick app3 (image :path "/usr/share/icons/Papirus/24x24/apps/${app3}.svg" :image-width 40))
- (button :onclick app4 (image :path "/usr/share/icons/Papirus/24x24/apps/${app4}.svg" :image-width 40))
-))
-
-(defwidget qkb []
-(box :space-evenly false :orientation "v" :class "bg"
- (label :text "Qtile Keybindings" :xalign 0.5 :yalign 0.5 :class "header")
- (label :text qtlkb :class "base" :xalign 0.5)
+ (button :onclick 'cd ~ && ${app3}' (image :path "/usr/share/icons/Papirus/24x24/apps/${app3}.svg" :image-width 40))
+ (button :onclick 'cd ~ && ~/.local/bin/neovide' (image :path "/usr/share/icons/Papirus/24x24/apps/nvim.svg" :image-width 40))
 ))
 
 ;; WINDOWS
@@ -131,7 +135,7 @@
 		:y "15px"
 		:anchor "top right"
 		:height "190px"
-		:width "420px")
+		:width "480px")
 	:stacking "bg"
 	:windowtype "normal"
 	:wm-ignore true
@@ -139,10 +143,10 @@
 (deadbeef))
 
 (defwindow stats :geometry
-(geometry  :x "0px"
+(geometry  :x "15px"
 		 :y "-43px"
-		 :anchor "bottom center"
-		 :height "200px"
+		 :anchor "bottom left"
+		 :height "320px"
 		 :width "600px")
 	:stacking "bg"
 	:windowtype "normal"
@@ -154,7 +158,7 @@
 		 :y "40%"
 		 :anchor "top center"
 		 :height "140px"
-		 :width "390px")
+		 :width "460px")
 	:stacking "fg"
 	:windowtype "normal"
 	:wm-ignore true
@@ -171,13 +175,3 @@
 	:wm-ignore true
 (icons))
 
-(defwindow keybind :geometry
-(geometry :x "0%"
-		:y "10%"
-		:height "40%"
-		:width "30%"
-		:anchor "top center")
-	:stacking "bg"
-	:windowtype "normal"
-	:wm-ignore true
-(qkb))
