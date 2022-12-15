@@ -1,0 +1,2 @@
+#/usr/bin/bash
+deadbeef --nowplaying-tf "%album% - %artist%" | sed -e 's:\::-:g'

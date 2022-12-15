@@ -8,6 +8,8 @@
 ;; =========
 (defpoll songname :interval "1s"
 	'deadbeef --nowplaying-tf "%title% by %artist% (%album%)"')
+(defpoll deadbeefalbumart :interval "1s"
+    'scripts/albumart.sh')
 (defpoll user :interval "1h"
 	'whoami')
 (defpoll host :interval "1h"
@@ -82,12 +84,14 @@
 (defwidget deadbeef []
 (box :space-evenly false :orientation "v" :class "bg"
  (label :text {songname == " by  ()" ? "DeaDBeeF" : songname}
+    :height 60
 	:xalign 0.5
-	:yalign 0.7
+	:yalign 0.5
 	:class "header"
 	:wrap true
 	:vexpand true)
- (box :space-evenly true :orientation "h" :vexpand true :spacing 5 :halign "center" :width 460 :valign "center" :height 95
+ (image :path '/home/aman/.cache/deadbeef/covers2/${deadbeefalbumart}.jpg' :image-height 258 :image-width 450)
+ (box :space-evenly true :orientation "h" :vexpand true :halign "center" :width 450 :valign "end" :height 95
   (button :class "button"
 	  :onclick '/usr/bin/deadbeef --prev'
 	  "")
@@ -135,7 +139,7 @@
 		:y "15px"
 		:anchor "top right"
 		:height "190px"
-		:width "480px")
+		:width "460px")
 	:stacking "bg"
 	:windowtype "normal"
 	:wm-ignore true
@@ -175,3 +179,4 @@
 	:wm-ignore true
 (icons))
 
+; vim ts=4
