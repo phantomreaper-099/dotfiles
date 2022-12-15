@@ -26,3 +26,7 @@ All of these dotfiles were made for my personal use and might not work for you. 
 
 - [DeaDBeeF (music player)](github.com/DeaDBeeF-Player/deadbeef)
 - [Papirus Icon Theme](https://github.com/PapirusDevelopmentTeam/papirus-icon-theme)
+
+## Screenshot
+
+![Screenshot](Screenshot_20221215_214515.png "Screenshot")
